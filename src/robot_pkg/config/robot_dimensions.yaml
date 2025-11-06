@@ -1,0 +1,31 @@
+
+leg:
+  leg_acronyms: ["LF", "RF", "LB", "RB"] # left front, right front, left back, right back
+  link1_length: 5 # hip [cm]
+  link2_length: 10 # thigh [cm]
+  link3_length: 9 # shin [cm]
+
+joint_limits: 
+  hip: [-30, 30] # deg 
+  thigh: [-60, 60] # deg
+  shin: [0, 120] # deg
+
+body:
+  width: 10 # [cm]
+  length: 24 # [cm]
+  height: 6 # [cm]
+
+walking:
+  deg_per_sec: 10
+  max_step_height_pct: 0.2
+  step_length_deg: 20 # with leg fully straight, degree rotated forward for max step length
+  LF_phase_offset: 0 # left front leg phase offset in degrees
+  RF_phase_offset: 180 # right front leg phase offset in degrees
+  LB_phase_offset: 180 # left back leg phase offset in degrees
+  RB_phase_offset: 0 # right back leg phase offset in degrees
+
+control:
+  control_hz: 50 # control loop frequency in Hz
+
+neutral_stance:
+  neutral_stance_height_pct: 0.7 # percentage of straight leg height

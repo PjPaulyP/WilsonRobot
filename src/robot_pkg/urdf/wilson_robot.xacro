@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="wilson_robot">
+
+  <!-- Arguments (all values should be in meters when passed) -->
+  <xacro:arg name="body_length" default="0.24"/>
+  <xacro:arg name="body_width" default="0.10"/>
+  <xacro:arg name="body_height" default="0.06"/>
+
+  <xacro:arg name="link1_len" default="0.05"/>
+  <xacro:arg name="link2_len" default="0.10"/>
+  <xacro:arg name="link3_len" default="0.09"/>
+
+  <!-- hip positions (meters) -->
+  <xacro:arg name="hip_front_x" default="0.12"/>
+  <xacro:arg name="hip_back_x" default="-0.12"/>
+  <xacro:arg name="hip_left_y" default="0.05"/>
+  <xacro:arg name="hip_right_y" default="-0.05"/>
+
+  <!-- Joint limits (radians) -->
+  <xacro:arg name="hip_lower" default="-1.5708"/>
+  <xacro:arg name="hip_upper" default="1.5708"/>
+  <xacro:arg name="thigh_lower" default="-1.5708"/>
+  <xacro:arg name="thigh_upper" default="1.5708"/>
+  <xacro:arg name="shin_lower" default="0.0"/>
+  <xacro:arg name="shin_upper" default="2.35619"/>
+
+  <!-- Base link (body) -->
+    <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${xacro.arg('body_length')} ${xacro.arg('body_width')} ${xacro.arg('body_height')}"/>
+      </geometry>
+      <material name="grey">
+        <color rgba="0.6 0.6 0.6 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${xacro.arg('body_length')} ${xacro.arg('body_width')} ${xacro.arg('body_height')}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Macro to create a 3-DOF leg; joint names match controller: <LEG>_theta1, <LEG>_theta2, <LEG>_theta3 -->
+  <xacro:macro name="three_dof_leg" params="LEG hip_x hip_y link1 link2 link3">
+    <link name="${LEG}_link1"/>
+    <link name="${LEG}_link2"/>
+    <link name="${LEG}_link3"/>
+
+    <joint name="${LEG}_theta1" type="revolute">
+      <parent link="base_link"/>
+      <child link="${LEG}_link1"/>
+      <origin xyz="${hip_x} ${hip_y} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+  <limit lower="${xacro.arg('hip_lower')}" upper="${xacro.arg('hip_upper')}" effort="1.0" velocity="5.0"/>
+    </joint>
+
+    <joint name="${LEG}_theta2" type="revolute">
+      <parent link="${LEG}_link1"/>
+      <child link="${LEG}_link2"/>
+      <origin xyz="0 0 -${link1}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+  <limit lower="${xacro.arg('thigh_lower')}" upper="${xacro.arg('thigh_upper')}" effort="1.0" velocity="5.0"/>
+    </joint>
+
+    <joint name="${LEG}_theta3" type="revolute">
+      <parent link="${LEG}_link2"/>
+      <child link="${LEG}_link3"/>
+      <origin xyz="0 0 -${link2}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+  <limit lower="${xacro.arg('shin_lower')}" upper="${xacro.arg('shin_upper')}" effort="1.0" velocity="5.0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Instantiate legs -->
+  <xacro:three_dof_leg LEG="LF" hip_x="${xacro.arg('hip_front_x')}" hip_y="${xacro.arg('hip_left_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
+  <xacro:three_dof_leg LEG="RF" hip_x="${xacro.arg('hip_front_x')}" hip_y="${xacro.arg('hip_right_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
+  <xacro:three_dof_leg LEG="LB" hip_x="${xacro.arg('hip_back_x')}" hip_y="${xacro.arg('hip_left_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
+  <xacro:three_dof_leg LEG="RB" hip_x="${xacro.arg('hip_back_x')}" hip_y="${xacro.arg('hip_right_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
+
+</robot>
