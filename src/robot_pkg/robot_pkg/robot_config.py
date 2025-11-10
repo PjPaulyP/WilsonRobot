@@ -34,6 +34,14 @@ class RobotConfig:
     dh_left: list[dict]
     dh_right: list[dict]
 
+    servo_channels: list[int]
+    servo_pwm_mins: list[int]
+    servo_pwm_maxs: list[int]
+    joint_limit_mins: list[float]
+    joint_limit_maxs: list[float]
+    joint_offsets: list[float]
+    joint_reversed: list[int] # some servos may be reversed because servo body moves with link
+
     def __init__(self):
         self.params = None
 
@@ -53,10 +61,7 @@ class RobotConfig:
         # leg and joint names 
         self.joint_names = []
         self.leg_names = params["leg"]["leg_acronyms"] # LF = left front, RF = right front, LB = left back, RB = right back
-        angle_names = ['theta1', 'theta2', 'theta3']
-        for leg in self.leg_names:
-            for angle in angle_names:
-                self.joint_names.append(f"{leg}_{angle}")
+        self.joint_names = params["leg"]["joint_names"]
                 
         self.control_hz = params["control"]["control_hz"]
         
@@ -111,6 +116,12 @@ class RobotConfig:
         for leg in self.leg_names:
             self.phase_offsets[leg] = params["walking"][f"{leg}_phase_offset"]
 
+        self.joint_limit_mins = params["servos"].get("min_angles", {})
+        self.joint_limit_maxs = params["servos"].get("max_angles", {})
+        self.joint_offsets = params["servos"].get("offsets", {})
+        self.joint_reversed = params["servos"].get("reversed", {})
+        self.servo_map = params["servos"].get("servo_map", {})
+        
 
     def calc_neutral_stance_height(self, neutral_stance_height_pct):
         # Calculate neutral height from hip axis to ground

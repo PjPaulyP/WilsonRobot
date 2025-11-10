@@ -1,14 +1,13 @@
 
 leg:
   leg_acronyms: ["LF", "RF", "LB", "RB"] # left front, right front, left back, right back
+  joint_names: ["LF_theta1", "LF_theta2", "LF_theta3",
+                "RF_theta1", "RF_theta2", "RF_theta3",
+                "LB_theta1", "LB_theta2", "LB_theta3",
+                "RB_theta1", "RB_theta2", "RB_theta3"]
   link1_length: 5 # hip [cm]
   link2_length: 10 # thigh [cm]
   link3_length: 9 # shin [cm]
-
-joint_limits: 
-  hip: [-30, 30] # deg 
-  thigh: [-60, 60] # deg
-  shin: [0, 120] # deg
 
 body:
   width: 10 # [cm]
@@ -16,7 +15,7 @@ body:
   height: 6 # [cm]
 
 walking:
-  deg_per_sec: 10
+  deg_per_sec: 30
   max_step_height_pct: 0.2
   step_length_deg: 20 # with leg fully straight, degree rotated forward for max step length
   LF_phase_offset: 0 # left front leg phase offset in degrees
@@ -29,3 +28,74 @@ control:
 
 neutral_stance:
   neutral_stance_height_pct: 0.7 # percentage of straight leg height
+
+servos:
+  servo_map:
+    LF_theta1: 0 
+    LF_theta2: 1 
+    LF_theta3: 2 
+    RF_theta1: 3
+    RF_theta2: 4
+    RF_theta3: 5
+    LB_theta1: 6
+    LB_theta2: 7
+    LB_theta3: 8
+    RB_theta1: 9
+    RB_theta2: 10
+    RB_theta3: 11
+  
+  reversed:
+    LF_theta1: false 
+    LF_theta2: true 
+    LF_theta3: true 
+    RF_theta1: false
+    RF_theta2: true
+    RF_theta3: true
+    LB_theta1: false
+    LB_theta2: true
+    LB_theta3: true
+    RB_theta1: false
+    RB_theta2: true
+    RB_theta3: true
+
+  offsets:
+    LF_theta1: 0 
+    LF_theta2: 0 
+    LF_theta3: 0 
+    RF_theta1: 0
+    RF_theta2: 0
+    RF_theta3: 0
+    LB_theta1: 0
+    LB_theta2: 0
+    LB_theta3: 0
+    RB_theta1: 0
+    RB_theta2: 0
+    RB_theta3: 0
+
+  min_angles:
+    LF_theta1: -90 
+    LF_theta2: -90
+    LF_theta3: -90
+    RF_theta1: -90
+    RF_theta2: -90
+    RF_theta3: -90
+    LB_theta1: -90
+    LB_theta2: -90
+    LB_theta3: -90
+    RB_theta1: -90
+    RB_theta2: -90
+    RB_theta3: -90
+
+  max_angles:
+    LF_theta1: 90 
+    LF_theta2: 90
+    LF_theta3: 90
+    RF_theta1: 90
+    RF_theta2: 90
+    RF_theta3: 90
+    LB_theta1: 90
+    LB_theta2: 90
+    LB_theta3: 90
+    RB_theta1: 90
+    RB_theta2: 90
+    RB_theta3: 90

@@ -25,7 +25,7 @@
   <xacro:arg name="shin_upper" default="2.35619"/>
 
   <!-- Base link (body) -->
-    <link name="base_link">
+  <link name="base_link">
     <visual>
       <geometry>
         <box size="${xacro.arg('body_length')} ${xacro.arg('body_width')} ${xacro.arg('body_height')}"/>
@@ -42,40 +42,14 @@
   </link>
 
   <!-- Macro to create a 3-DOF leg; joint names match controller: <LEG>_theta1, <LEG>_theta2, <LEG>_theta3 -->
-  <xacro:macro name="three_dof_leg" params="LEG hip_x hip_y link1 link2 link3">
-    <link name="${LEG}_link1"/>
-    <link name="${LEG}_link2"/>
-    <link name="${LEG}_link3"/>
+  <!-- Include external leg macro and instantiate four legs at the bottom corners of the body -->
+  <xacro:include filename="leg_macro.xacro"/>
+  <!-- compute hip z as half body height below base_link origin -->
+  <xacro:property name="hip_z" value="${-float(xacro.arg('body_height'))/2.0}"/>
 
-    <joint name="${LEG}_theta1" type="revolute">
-      <parent link="base_link"/>
-      <child link="${LEG}_link1"/>
-      <origin xyz="${hip_x} ${hip_y} 0" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-  <limit lower="${xacro.arg('hip_lower')}" upper="${xacro.arg('hip_upper')}" effort="1.0" velocity="5.0"/>
-    </joint>
-
-    <joint name="${LEG}_theta2" type="revolute">
-      <parent link="${LEG}_link1"/>
-      <child link="${LEG}_link2"/>
-      <origin xyz="0 0 -${link1}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-  <limit lower="${xacro.arg('thigh_lower')}" upper="${xacro.arg('thigh_upper')}" effort="1.0" velocity="5.0"/>
-    </joint>
-
-    <joint name="${LEG}_theta3" type="revolute">
-      <parent link="${LEG}_link2"/>
-      <child link="${LEG}_link3"/>
-      <origin xyz="0 0 -${link2}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-  <limit lower="${xacro.arg('shin_lower')}" upper="${xacro.arg('shin_upper')}" effort="1.0" velocity="5.0"/>
-    </joint>
-  </xacro:macro>
-
-  <!-- Instantiate legs -->
-  <xacro:three_dof_leg LEG="LF" hip_x="${xacro.arg('hip_front_x')}" hip_y="${xacro.arg('hip_left_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
-  <xacro:three_dof_leg LEG="RF" hip_x="${xacro.arg('hip_front_x')}" hip_y="${xacro.arg('hip_right_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
-  <xacro:three_dof_leg LEG="LB" hip_x="${xacro.arg('hip_back_x')}" hip_y="${xacro.arg('hip_left_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
-  <xacro:three_dof_leg LEG="RB" hip_x="${xacro.arg('hip_back_x')}" hip_y="${xacro.arg('hip_right_y')}" link1="${xacro.arg('link1_len')}" link2="${xacro.arg('link2_len')}" link3="${xacro.arg('link3_len')}"/>
+  <xacro:leg prefix="LF" x="${xacro.arg('hip_front_x')}" y="${xacro.arg('hip_left_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
+  <xacro:leg prefix="RF" x="${xacro.arg('hip_front_x')}" y="${xacro.arg('hip_right_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
+  <xacro:leg prefix="LB" x="${xacro.arg('hip_back_x')}" y="${xacro.arg('hip_left_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
+  <xacro:leg prefix="RB" x="${xacro.arg('hip_back_x')}" y="${xacro.arg('hip_right_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
 
 </robot>

@@ -223,7 +223,7 @@ class GaitController(Node):
         print(joint_angles[9:])
         print('\n')
 
-        print(self.robot.joint_names)
+        # print(self.robot.joint_names)
         
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()

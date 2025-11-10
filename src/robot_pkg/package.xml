@@ -13,7 +13,8 @@
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-pandas</exec_depend>
   <exec_depend>python3-scipy</exec_depend>
-  <exec_depend>set_mode_interface</exec_depend>
+  <exec_depend>adafruit-circuitpython-servokit</exec_depend>
+  <!-- <exec_depend>set_mode_interface</exec_depend> -->
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

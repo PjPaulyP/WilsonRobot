@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<xacro:macro name="leg" params="prefix x y z leg_upper leg_lower leg_width">
+  <!-- Create 3 links and 3 joints named to match existing controllers: <PREFIX>_link1..3 and <PREFIX>_theta1..3 -->
+  <link name="${prefix}_link1"/>
+  <link name="${prefix}_link2"/>
+  <link name="${prefix}_link3"/>
+
+  <!-- Hip joint (theta1) -->
+  <joint name="${prefix}_theta1" type="revolute">
+    <parent link="base_link"/>
+    <child link="${prefix}_link1"/>
+    <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="5" velocity="5" lower="-1.5708" upper="1.5708"/>
+  </joint>
+
+  <!-- Thigh joint (theta2) -->
+  <joint name="${prefix}_theta2" type="revolute">
+    <parent link="${prefix}_link1"/>
+    <child link="${prefix}_link2"/>
+    <!-- Origin places link2 a distance leg_upper along -Z from link1 -->
+    <origin xyz="0 0 -${leg_upper}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="5" velocity="5" lower="-1.5708" upper="1.5708"/>
+  </joint>
+
+  <!-- Knee joint (theta3) -->
+  <joint name="${prefix}_theta3" type="revolute">
+    <parent link="${prefix}_link2"/>
+    <child link="${prefix}_link3"/>
+    <!-- Origin places link3 a distance leg_lower along -Z from link2 -->
+    <origin xyz="0 0 -${leg_lower}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="5" velocity="5" lower="0.0" upper="2.35619"/>
+  </joint>
+
+  <!-- Visuals and collisions -->
+  <!-- Small hip block to indicate attachment point -->
+  <link name="${prefix}_hip_visual_temp">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${leg_width} ${leg_width} 0.05"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <!-- Thigh visual (cylinder along -Z) -->
+  <link name="${prefix}_thigh_visual_temp">
+    <visual>
+      <origin xyz="0 0 -${leg_upper/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${leg_upper}" radius="${leg_width/2}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <!-- Shin visual (cylinder) -->
+  <link name="${prefix}_shin_visual_temp">
+    <visual>
+      <origin xyz="0 0 -${leg_lower/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${leg_lower}" radius="${leg_width/2}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <!-- Attach the visual links to the kinematic links using fixed joints so visuals follow kinematics -->
+  <joint name="${prefix}_link1_visual_fixed" type="fixed">
+    <parent link="${prefix}_link1"/>
+    <child link="${prefix}_hip_visual_temp"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="${prefix}_link2_visual_fixed" type="fixed">
+    <parent link="${prefix}_link2"/>
+    <child link="${prefix}_thigh_visual_temp"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="${prefix}_link3_visual_fixed" type="fixed">
+    <parent link="${prefix}_link3"/>
+    <child link="${prefix}_shin_visual_temp"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+</xacro:macro>

@@ -37,6 +37,7 @@ setup(
         'console_scripts': [
             'gait_controller = robot_pkg.gait_controller_node:main',
             'mode_manager = robot_pkg.mode_node:main',
+            'servo_bridge = robot_pkg.servo_bridge:main',
         ],
     },
 )

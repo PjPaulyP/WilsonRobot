@@ -1,0 +1,7 @@
+
+#TODO
+
+- Turn robot_config in ROS2 params
+- Develop ServoBridge
+    - Need to factor in that some Servos angles will be inverse because the servo itself is moving the joint not the arm
+
