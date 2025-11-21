@@ -16,7 +16,7 @@ class ServoBridge(Node):
         
         self.subscription = self.create_subscription(
             JointState,
-            '/joint_state',
+            '/joint_states',
             self.listener_callback,
             10)
          
@@ -31,17 +31,21 @@ class ServoBridge(Node):
 
             channel = self.robot_config.servo_map[joint_name]
             angle_deg = np.degrees(pos)
-
+            
             # Apply reversed mount or offset
             if not self.robot_config.joint_reversed[joint_name]:
-                angle_deg = -angle_deg
+                angle_deg = 90+np.degrees(pos) # add 90 to shift from [-90,90] to [0,180] since that is what ServoKit accepts
+            else:
+                angle_deg = 180-angle_deg # reverse direction and shift
             angle_deg += self.robot_config.joint_offsets.get(joint_name, 0)
+
+            print(f"Joint: {joint_name}, Angle: {angle_deg}")
 
             # Clamp to servo safe range
             angle_deg = self.clamp(angle_deg, self.robot_config.joint_limit_mins[joint_name], self.robot_config.joint_limit_maxs[joint_name])
 
             # Send to servo
-            channel = self.robot_config.servo_map[joint_name]['channel']
+            channel = self.robot_config.servo_map[joint_name]
             try:
                 self.kit.servo[channel].angle = angle_deg
             except Exception as e:
