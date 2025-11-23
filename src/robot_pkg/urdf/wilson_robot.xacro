@@ -6,15 +6,39 @@
   <xacro:arg name="body_width" default="0.10"/>
   <xacro:arg name="body_height" default="0.06"/>
 
-  <xacro:arg name="link1_len" default="0.05"/>
-  <xacro:arg name="link2_len" default="0.10"/>
-  <xacro:arg name="link3_len" default="0.09"/>
+  <xacro:arg name="hip_length" default="0.05"/>
+  <xacro:arg name="thigh_length" default="0.10"/>
+  <xacro:arg name="shin_length" default="0.09"/>
+  <xacro:property name="leg_width" value="0.02"/>
+  <xacro:property name="leg_radius" value="${leg_width * 0.5}"/>
 
-  <!-- hip positions (meters) -->
-  <xacro:arg name="hip_front_x" default="0.12"/>
-  <xacro:arg name="hip_back_x" default="-0.12"/>
-  <xacro:arg name="hip_left_y" default="0.05"/>
-  <xacro:arg name="hip_right_y" default="-0.05"/>
+  <!-- Frame orientations, when applying each RPY, apply the RPY on the OG axis -->
+  <xacro:property name="left_hip_joint_rpy" value="3.14159 1.57075 0"/>
+  <xacro:property name="right_hip_joint_rpy" value="0 -1.57075 3.14159"/>
+  <xacro:property name="left_thigh_joint_rpy" value="0 0 0"/>
+  <xacro:property name="right_thigh_joint_rpy" value="-1.57075 3.14159 0"/>
+  <xacro:property name="left_knee_joint_rpy" value="0 0 0"/>
+  <xacro:property name="right_knee_joint_rpy" value="0 0 0"/>
+
+  <!-- Joint origins (meters) Origins use PARENT LINK FRAME -->
+  <xacro:property name="LF_hip_joint_origin" value="0 ${-float(xacro.arg('body_width')) * 0.5} ${float(xacro.arg('body_length')) * 0.5}"/>
+  <xacro:property name="RF_hip_joint_origin" value="${float(xacro.arg('body_length')) * 0.5} ${-float(xacro.arg('body_width')) * 0.5} 0"/>
+  <xacro:property name="LB_hip_joint_origin" value="0 ${-float(xacro.arg('body_width')) * 0.5} ${-float(xacro.arg('body_length')) * 0.5}"/>
+  <xacro:property name="RB_hip_joint_origin" value="${-float(xacro.arg('body_length')) * 0.5} ${-float(xacro.arg('body_width')) * 0.5} 0"/>
+  <xacro:property name="left_thigh_joint_origin" value="0 ${-float(xacro.arg('hip_length'))} 0"/>
+  <xacro:property name="right_thigh_joint_origin" value="0 ${float(xacro.arg('hip_length'))} 0"/>
+  <xacro:property name="knee_joint_origin" value="${float(xacro.arg('thigh_length'))} 0 0"/>
+
+  <!-- Visual origins (meters), in terms of link frame-->
+  <xacro:property name="left_hip_visual_origin" value="0 ${-float(xacro.arg('hip_length')) * 0.5} 0"/>
+  <xacro:property name="right_hip_visual_origin" value="0 ${float(xacro.arg('hip_length')) * 0.5} 0"/>
+  <xacro:property name="thigh_visual_origin" value="${float(xacro.arg('thigh_length')) * 0.5} 0 0"/>
+  <xacro:property name="shin_visual_origin" value="${float(xacro.arg('shin_length')) * 0.5} 0 0"/>
+
+  <!-- Visual RPY - Cylinders point in Z axis of child link frame but RPY applies to parent -->
+  <xacro:property name="hip_visual_rpy" value="1.57075 0 0"/>
+  <xacro:property name="thigh_visual_rpy" value="0 1.57075 0"/>
+  <xacro:property name="shin_visual_rpy" value="0 1.57075 0"/>
 
   <!-- Joint limits (radians) -->
   <xacro:arg name="hip_lower" default="-1.5708"/>
@@ -24,32 +48,195 @@
   <xacro:arg name="shin_lower" default="0.0"/>
   <xacro:arg name="shin_upper" default="2.35619"/>
 
+  <!-- Default inertial macro (removed unused x,y,z params) -->
+  <xacro:macro name="inertial_box" params="mass">
+    <inertial>
+      <mass value="${mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.01" iyy="0.01" izz="0.01"
+               ixy="0.0" ixz="0.0" iyz="0.0"/>
+    </inertial>
+  </xacro:macro>
+
+
   <!-- Base link (body) -->
-  <link name="base_link">
-    <visual>
-      <geometry>
-        <box size="${xacro.arg('body_length')} ${xacro.arg('body_width')} ${xacro.arg('body_height')}"/>
-      </geometry>
-      <material name="grey">
-        <color rgba="0.6 0.6 0.6 1.0"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="${xacro.arg('body_length')} ${xacro.arg('body_width')} ${xacro.arg('body_height')}"/>
-      </geometry>
-    </collision>
-  </link>
+  <xacro:macro name="chassis" params="name length width height">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <box size="${length} ${width} ${height}"/>
+        </geometry>
+        <material name="grey">
+          <color rgba="0.6 0.6 0.6 1.0"/>
+        </material>
+      </visual>
+    </link>
+  </xacro:macro>
 
-  <!-- Macro to create a 3-DOF leg; joint names match controller: <LEG>_theta1, <LEG>_theta2, <LEG>_theta3 -->
+  <!-- Macro to create a 3-DOF leg; joint names match controller: <LEG>_hip_joint, <LEG>_thigh_joint, <LEG>_shin_joint -->
   <!-- Include external leg macro and instantiate four legs at the bottom corners of the body -->
-  <xacro:include filename="leg_macro.xacro"/>
-  <!-- compute hip z as half body height below base_link origin -->
-  <xacro:property name="hip_z" value="${-float(xacro.arg('body_height'))/2.0}"/>
+  <xacro:macro name="leg" params="prefix 
+                                  hip_joint_rpy thigh_joint_rpy knee_joint_rpy
+                                  hip_joint_origin thigh_joint_origin knee_joint_origin
+                                  hip_visual_rpy thigh_visual_rpy shin_visual_rpy
+                                  hip_visual_origin thigh_visual_origin shin_visual_origin
+                                  hip_lower hip_upper thigh_lower thigh_upper shin_lower shin_upper">
 
-  <xacro:leg prefix="LF" x="${xacro.arg('hip_front_x')}" y="${xacro.arg('hip_left_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
-  <xacro:leg prefix="RF" x="${xacro.arg('hip_front_x')}" y="${xacro.arg('hip_right_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
-  <xacro:leg prefix="LB" x="${xacro.arg('hip_back_x')}" y="${xacro.arg('hip_left_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
-  <xacro:leg prefix="RB" x="${xacro.arg('hip_back_x')}" y="${xacro.arg('hip_right_y')}" z="${hip_z}" leg_upper="${xacro.arg('link1_len')}" leg_lower="${xacro.arg('link2_len')}" leg_width="0.02"/>
+    <!-- Create 3 links and 3 joints named to match existing controllers: <PREFIX>_link1..3 and <PREFIX>_theta1..3 -->
+    <link name="${prefix}_hip_link">
+      <visual>
+        <origin xyz="${hip_visual_origin}" rpy="${hip_visual_rpy}"/>
+        <geometry>
+          <cylinder radius="${leg_radius}" length="${xacro.arg('hip_length')}"/>
+        </geometry>
+      </visual>
+      <!-- <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius ="${'leg_radius'}" length="${xacro.arg('hip_length')}"/></geometry>
+      </collision>
+      <xacro:inertial_box mass="0.1"/> -->
+    </link>
+
+    <link name="${prefix}_thigh_link">
+      <visual>
+        <origin xyz="${thigh_visual_origin}" rpy="${thigh_visual_rpy}"/>
+        <geometry><cylinder radius="${leg_radius}" length="${xacro.arg('thigh_length')}"/></geometry>
+      </visual>
+      <!-- <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius ="${'leg_width_half'}" length="${xacro.arg('thigh_length')}"/></geometry>
+      </collision>
+      <xacro:inertial_box mass="0.1"/> -->
+    </link>
+
+    <link name="${prefix}_shin_link">
+      <visual>
+        <origin xyz="${shin_visual_origin}" rpy="${shin_visual_rpy}"/>
+        <geometry><cylinder radius="${leg_radius}" length="${xacro.arg('shin_length')}"/></geometry>
+      </visual>
+      <!-- <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius ="${'leg_radius'}" length="${xacro.arg('shin_length')}"/></geometry>
+      </collision>
+      <xacro:inertial_box mass="0.1"/> -->
+    </link>
+
+    <!-- Hip joint (theta1) -->
+    <joint name="${prefix}_theta1" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_hip_link"/>
+      <origin xyz="${hip_joint_origin}" rpy="${hip_joint_rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="5" velocity="5" lower="${hip_lower}" upper="${hip_upper}"/>
+    </joint>
+
+    <!-- Thigh joint (theta2) -->
+    <joint name="${prefix}_theta2" type="revolute">
+      <parent link="${prefix}_hip_link"/>
+      <child link="${prefix}_thigh_link"/>
+      <!-- Origin places link2 a distance thigh_length along -Z from link1 -->
+      <origin xyz="${thigh_joint_origin}" rpy="${thigh_joint_rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="5" velocity="5" lower="${thigh_lower}" upper="${thigh_upper}"/>
+    </joint>
+
+    <!-- Knee joint (theta3) -->
+    <joint name="${prefix}_theta3" type="revolute">
+      <parent link="${prefix}_thigh_link"/>
+      <child link="${prefix}_shin_link"/>
+      <!-- Origin places link3 a distance shin_length along -Z from link2 -->
+      <origin xyz="${knee_joint_origin}" rpy="${knee_joint_rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="5" velocity="5" lower="${shin_lower}" upper="${shin_upper}"/>
+    </joint>
+
+  </xacro:macro>
+
+            <!-- z="${-float(xacro.arg('body_height'))/2.0}" -->
+            <!-- z="${-float(xacro.arg('body_height'))/2.0}" -->
+            <!-- z="${-float(xacro.arg('body_height'))/2.0}" -->
+            <!-- z="${-float(xacro.arg('body_height'))/2.0}" -->
+
+  
+  <xacro:chassis name="base_link" length="${xacro.arg('body_length')}" width="${xacro.arg('body_width')}" height="${xacro.arg('body_height')}"/>
+
+  <!-- 4 legs -->
+  <xacro:leg prefix="LF"
+             hip_joint_rpy ="${left_hip_joint_rpy}"
+             thigh_joint_rpy ="${left_thigh_joint_rpy}"
+             knee_joint_rpy ="${left_knee_joint_rpy}"
+             hip_joint_origin ="${LF_hip_joint_origin}"
+             thigh_joint_origin ="${left_thigh_joint_origin}"
+             knee_joint_origin ="${knee_joint_origin}"
+             hip_visual_rpy ="${hip_visual_rpy}"
+             thigh_visual_rpy ="${thigh_visual_rpy}"
+             shin_visual_rpy ="${shin_visual_rpy}"
+             hip_visual_origin ="${left_hip_visual_origin}"
+             thigh_visual_origin ="${thigh_visual_origin}"
+             shin_visual_origin ="${shin_visual_origin}"
+             hip_lower="${xacro.arg('hip_lower')}"
+             hip_upper="${xacro.arg('hip_upper')}"
+             thigh_lower="${xacro.arg('thigh_lower')}"
+             thigh_upper="${xacro.arg('thigh_upper')}"
+             shin_lower="${xacro.arg('shin_lower')}"
+             shin_upper="${xacro.arg('shin_upper')}"/>
+  <xacro:leg prefix="RF"
+             hip_joint_rpy ="${right_hip_joint_rpy}"
+             thigh_joint_rpy ="${right_thigh_joint_rpy}"
+             knee_joint_rpy ="${right_knee_joint_rpy}"
+             hip_joint_origin ="${RF_hip_joint_origin}"
+             thigh_joint_origin ="${right_thigh_joint_origin}"
+             knee_joint_origin ="${knee_joint_origin}"
+             hip_visual_rpy ="${hip_visual_rpy}"
+             thigh_visual_rpy ="${thigh_visual_rpy}"
+             shin_visual_rpy ="${shin_visual_rpy}"
+             hip_visual_origin ="${right_hip_visual_origin}"
+             thigh_visual_origin ="${thigh_visual_origin}"
+             shin_visual_origin ="${shin_visual_origin}"
+             hip_lower="${xacro.arg('hip_lower')}"
+             hip_upper="${xacro.arg('hip_upper')}"
+             thigh_lower="${xacro.arg('thigh_lower')}"
+             thigh_upper="${xacro.arg('thigh_upper')}"
+             shin_lower="${xacro.arg('shin_lower')}"
+             shin_upper="${xacro.arg('shin_upper')}"/>
+  <xacro:leg prefix="LB"
+             hip_joint_rpy ="${left_hip_joint_rpy}"
+             thigh_joint_rpy ="${left_thigh_joint_rpy}"
+             knee_joint_rpy ="${left_knee_joint_rpy}"
+             hip_joint_origin ="${LB_hip_joint_origin}"
+             thigh_joint_origin ="${left_thigh_joint_origin}"
+             knee_joint_origin ="${knee_joint_origin}"
+             hip_visual_rpy ="${hip_visual_rpy}"
+             thigh_visual_rpy ="${thigh_visual_rpy}"
+             shin_visual_rpy ="${shin_visual_rpy}"
+             hip_visual_origin ="${left_hip_visual_origin}"
+             thigh_visual_origin ="${thigh_visual_origin}"
+             shin_visual_origin ="${shin_visual_origin}"
+             hip_lower="${xacro.arg('hip_lower')}"
+             hip_upper="${xacro.arg('hip_upper')}"
+             thigh_lower="${xacro.arg('thigh_lower')}"
+             thigh_upper="${xacro.arg('thigh_upper')}"
+             shin_lower="${xacro.arg('shin_lower')}"
+             shin_upper="${xacro.arg('shin_upper')}"/>
+  <xacro:leg prefix="RB"
+             hip_joint_rpy ="${right_hip_joint_rpy}"
+             thigh_joint_rpy ="${right_thigh_joint_rpy}"
+             knee_joint_rpy ="${right_knee_joint_rpy}"
+             hip_joint_origin ="${RB_hip_joint_origin}"
+             thigh_joint_origin ="${right_thigh_joint_origin}"
+             knee_joint_origin ="${knee_joint_origin}"
+             hip_visual_rpy ="${hip_visual_rpy}"
+             thigh_visual_rpy ="${thigh_visual_rpy}"
+             shin_visual_rpy ="${shin_visual_rpy}"
+             hip_visual_origin ="${right_hip_visual_origin}"
+             thigh_visual_origin ="${thigh_visual_origin}"
+             shin_visual_origin ="${shin_visual_origin}"
+             hip_lower="${xacro.arg('hip_lower')}"
+             hip_upper="${xacro.arg('hip_upper')}"
+             thigh_lower="${xacro.arg('thigh_lower')}"
+             thigh_upper="${xacro.arg('thigh_upper')}"
+             shin_lower="${xacro.arg('shin_lower')}"
+             shin_upper="${xacro.arg('shin_upper')}"/>
+
 
 </robot>

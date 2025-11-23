@@ -15,7 +15,7 @@ body:
   height: 6 # [cm]
 
 walking:
-  deg_per_sec: 30
+  deg_per_sec: 60
   max_step_height_pct: 0.2
   step_length_deg: 20 # with leg fully straight, degree rotated forward for max step length
   LF_phase_offset: 0 # left front leg phase offset in degrees
@@ -99,3 +99,12 @@ servos:
     RB_theta1: 150
     RB_theta2: 150
     RB_theta3: 180
+
+visualization:
+  joint_limits:
+    hip_lower: -90
+    hip_upper: 90
+    thigh_lower: -90
+    thigh_upper: 90
+    shin_lower: -90
+    shin_upper: 90

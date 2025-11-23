@@ -2,6 +2,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 import os
 import yaml
 import math
@@ -26,47 +27,39 @@ def generate_launch_description():
     link2_m = float(params['leg']['link2_length']) / 100.0
     link3_m = float(params['leg']['link3_length']) / 100.0
 
-    # hip coordinates (front/back, left/right)
-    half_len = body_length_m / 2.0
-    half_wid = body_width_m / 2.0
-    hip_front_x = half_len
-    hip_back_x = -half_len
-    hip_left_y = half_wid
-    hip_right_y = -half_wid
-
     # Convert joint limits (degrees in yaml) to radians for xacro args
-    def degs_to_rad(deg_list):
-        return [math.radians(float(d)) for d in deg_list]
+    def degs_to_rad(degrees):
+        return math.radians(float(degrees))
 
-    hip_lim = degs_to_rad(params['joint_limits']['hip'])
-    thigh_lim = degs_to_rad(params['joint_limits']['thigh'])
-    shin_lim = degs_to_rad(params['joint_limits']['shin'])
+    joint_limits = params['visualization'].get('joint_limits', {})
+    hip_lower = degs_to_rad(joint_limits["hip_lower"])
+    hip_upper = degs_to_rad(joint_limits["hip_upper"])
+    thigh_lower = degs_to_rad(joint_limits["thigh_lower"])
+    thigh_upper = degs_to_rad(joint_limits["thigh_upper"])
+    shin_lower = degs_to_rad(joint_limits["shin_lower"])
+    shin_upper = degs_to_rad(joint_limits["shin_upper"])
 
     # Build xacro command substitution to render URDF at launch time
     xacro_args = [
-        'body_length:=' + str(body_length_m),
-        'body_width:=' + str(body_width_m),
-        'body_height:=' + str(body_height_m),
-        'link1_len:=' + str(link1_m),
-        'link2_len:=' + str(link2_m),
-        'link3_len:=' + str(link3_m),
-        'hip_front_x:=' + str(hip_front_x),
-        'hip_back_x:=' + str(hip_back_x),
-        'hip_left_y:=' + str(hip_left_y),
-        'hip_right_y:=' + str(hip_right_y),
-        'hip_lower:=' + str(hip_lim[0]),
-        'hip_upper:=' + str(hip_lim[1]),
-        'thigh_lower:=' + str(thigh_lim[0]),
-        'thigh_upper:=' + str(thigh_lim[1]),
-        'shin_lower:=' + str(shin_lim[0]),
-        'shin_upper:=' + str(shin_lim[1]),
+        f'body_length:={body_length_m}',
+        f'body_width:={body_width_m}',
+        f'body_height:={body_height_m}',
+        f'hip_length:={link1_m}',
+        f'thigh_length:={link2_m}',
+        f'shin_length:={link3_m}',
+        f'hip_lower:={hip_lower}',
+        f'hip_upper:={hip_upper}',
+        f'thigh_lower:={thigh_lower}',
+        f'thigh_upper:={thigh_upper}',
+        f'shin_lower:={shin_lower}',
+        f'shin_upper:={shin_upper}',
     ]
 
     # Construct a single command string so Command substitution preserves spaces correctly
     xacro_cmd_str = 'xacro ' + urdf_xacro + ' ' + ' '.join(xacro_args)
-    robot_desc = Command(xacro_cmd_str)
+    robot_desc = ParameterValue(Command(xacro_cmd_str), value_type=str)
 
-    # robot_state_publisher node will publish TFs based on incoming JointState messages
+    # robot_state_publisher node publishes TF tree from URDF (static joints at default positions without joint states)
     rsp_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',

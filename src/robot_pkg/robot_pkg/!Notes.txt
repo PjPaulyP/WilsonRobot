@@ -5,3 +5,6 @@
 - Develop ServoBridge
     - Need to factor in that some Servos angles will be inverse because the servo itself is moving the joint not the arm
 
+- Develop visualization
+    - Remove variables and build into URDF XACRO (i.e., remove hip_front_x, etc)
+    - Change Xacro args to properties 
