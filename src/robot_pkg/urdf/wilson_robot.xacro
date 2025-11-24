@@ -13,17 +13,17 @@
   <xacro:property name="leg_radius" value="${leg_width * 0.5}"/>
 
   <!-- Frame orientations, when applying each RPY, apply the RPY on the OG axis -->
-  <xacro:property name="left_hip_joint_rpy" value="3.14159 1.57075 0"/>
-  <xacro:property name="right_hip_joint_rpy" value="0 -1.57075 3.14159"/>
-  <xacro:property name="left_thigh_joint_rpy" value="0 0 0"/>
-  <xacro:property name="right_thigh_joint_rpy" value="-1.57075 3.14159 0"/>
+  <xacro:property name="left_hip_joint_rpy" value="3.14159 -1.57075 0"/>
+  <xacro:property name="left_thigh_joint_rpy" value="1.57075 3.14159 0"/>
   <xacro:property name="left_knee_joint_rpy" value="0 0 0"/>
+  <xacro:property name="right_hip_joint_rpy" value="0 -1.57075 3.14159"/>
+  <xacro:property name="right_thigh_joint_rpy" value="-1.57075 3.14159 0"/>
   <xacro:property name="right_knee_joint_rpy" value="0 0 0"/>
 
   <!-- Joint origins (meters) Origins use PARENT LINK FRAME -->
-  <xacro:property name="LF_hip_joint_origin" value="0 ${-float(xacro.arg('body_width')) * 0.5} ${float(xacro.arg('body_length')) * 0.5}"/>
+  <xacro:property name="LF_hip_joint_origin" value="${float(xacro.arg('body_length')) * 0.5} ${float(xacro.arg('body_width')) * 0.5} 0"/>
   <xacro:property name="RF_hip_joint_origin" value="${float(xacro.arg('body_length')) * 0.5} ${-float(xacro.arg('body_width')) * 0.5} 0"/>
-  <xacro:property name="LB_hip_joint_origin" value="0 ${-float(xacro.arg('body_width')) * 0.5} ${-float(xacro.arg('body_length')) * 0.5}"/>
+  <xacro:property name="LB_hip_joint_origin" value="${-float(xacro.arg('body_length')) * 0.5} ${float(xacro.arg('body_width')) * 0.5} 0"/>
   <xacro:property name="RB_hip_joint_origin" value="${-float(xacro.arg('body_length')) * 0.5} ${-float(xacro.arg('body_width')) * 0.5} 0"/>
   <xacro:property name="left_thigh_joint_origin" value="0 ${-float(xacro.arg('hip_length'))} 0"/>
   <xacro:property name="right_thigh_joint_origin" value="0 ${float(xacro.arg('hip_length'))} 0"/>

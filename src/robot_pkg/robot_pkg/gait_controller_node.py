@@ -12,12 +12,6 @@ from robot_pkg import robot_config as robot_config_
 from robot_pkg import walk as walk_
 
 
-#### TO DO
-# - ADD LH DEVANIT HARTENBURG 
-# - VALIDATE THETA OUTPUTS
-# - HOW TO INTEGRATE TO HARDWARE?
-
-
 class GaitController(Node):
 
     def __init__(self, robot_config, walk):
@@ -42,18 +36,18 @@ class GaitController(Node):
 
     def vertical_wrt_leg_base(self, foot_height):
         """
-        Calculate vertical position of foot with respect to leg base frame.
+        Calculate vertical displacement of foot with respect to leg base frame.
 
         Base frame is located at hip joint.
 
-        foot_height: vertical position of foot with respect to ground
+        foot_height: vertical displacement of foot with respect to ground
         neutral_stance_height: height of body frame with respect to ground in neutral stance
 
         Returns: vertical position of foot with respect to leg base frame 
         """
         # Global frame is positive upwards from ground so make negative here. 
         # Later will multiply by rotation matrix if base frame is tilted.
-        return self.robot.neutral_stance_height + foot_height 
+        return self.robot.neutral_stance_height - foot_height 
 
     def sagital_wrt_leg_base(self, foot_forward):
         """
@@ -70,14 +64,14 @@ class GaitController(Node):
 
     def transverse_wrt_leg_base(self, foot_transverse):
         """
-        Calculate transverse position of foot with respect to base frame. (left/right)
+        Calculate transverse displacement of foot with respect to base frame. (left/right)
 
         Base frame is located at hip joint.
 
-        foot_transverse: transverse position of foot with respect to body center
+        foot_transverse: transverse displacement of foot with respect to body center
         neutral_stance_transverse: distance from foot to hip in transverse direction. Typically the hip length.
 
-        Returns: transverse position of foot with respect to base frame
+        Returns: transverse displacement of foot with respect to base frame
         """
         return self.robot.neutral_stance_transverse + foot_transverse
 
@@ -111,7 +105,7 @@ class GaitController(Node):
         Calculate target foot joint angles (thetas) based on foot position.
 
         Inputs:
-        foot_name: name of the foot/leg (e.g., 'LF', 'RF', 'LH', 'RH')
+        foot_name: name of the foot/leg (e.g., 'LF', 'RF', 'LB', 'RB')
         vertical: vertical position of foot with respect to leg base frame
         transverse: transverse position of foot with respect to leg base frame
         sagittal: sagittal position of foot with respect to leg base frame
@@ -122,7 +116,7 @@ class GaitController(Node):
         # 
         X, Y, Z = self.foot_position_to_base(foot_name, vertical, transverse, sagittal)
 
-        if foot_name in ['LF', 'LH']:
+        if foot_name in ['LF', 'LB']:
             dh_table = self.robot.dh_left
         else:
             dh_table = self.robot.dh_right
@@ -145,7 +139,7 @@ class GaitController(Node):
         -------
         leg_base_x, leg_base_y, leg_base_z: foot position with respect to leg base frame
         """
-        if foot_name in ['LF', 'LH']:
+        if foot_name in ['LF', 'LB']:
             return -vertical, -transverse, sagittal
         else:
             return -vertical, transverse, sagittal

@@ -87,7 +87,7 @@ class RobotConfig:
         ]
 
         self.dh_left = [
-            {'a': 0.0, 'alpha': -np.pi/2, 'd': 0.0, 'theta': None},   # joint 0 -> theta variable t1
+            {'a': 0.0, 'alpha': np.pi/2, 'd': 0.0, 'theta': None},   # joint 0 -> theta variable t1
             {'a': 0.0, 'alpha': 0.0,       'd': L1, 'theta': np.pi},  # joint 1 fixed at 180deg
             {'a': L2,  'alpha': 0.0,       'd': 0.0, 'theta': None},   # joint 2 variable t2
             {'a': L3,  'alpha': 0.0,       'd': 0.0, 'theta': None},   # joint 3 variable t3 (end effector)
@@ -103,7 +103,8 @@ class RobotConfig:
 
         self.neutral_stance_thetas = self.calc_neutral_stance_thetas(
             self.neutral_stance_height,
-            [self.hip_length, self.thigh_length, self.shin_length],
+            self.neutral_stance_transverse,
+            self.neutral_stance_forward,
         )
 
         # walking params
@@ -138,7 +139,7 @@ class RobotConfig:
             self.thigh_length + self.shin_length
         )
 
-    def calc_neutral_stance_thetas(self, neutral_stance_height, link_lengths):
+    def calc_neutral_stance_thetas(self, neutral_stance_height, neutral_stance_transverse, neutral_stance_forward):
         
         '''
         
@@ -148,27 +149,32 @@ class RobotConfig:
             neutral stance joint angles for each leg
         '''
         
-        # Use inverse kinematics to calculate neutral stance joint angles
-        target_pos = [
-            -neutral_stance_height,  # x axis is vertical (positive up)
-            link_lengths[0],  # y axis is transverse (positive outwards)
-            0,  # z axis is sagittal (positive forward)...0 is directly under hip
-        ]
-        
         
         neutral_feet_thetas = {}
 
         for foot in self.leg_names:
 
-            if foot in ['LF', 'LH']:
+            if foot in ['LF', 'LB']:
                 dh_table = self.dh_left
+                target_pos = [
+                    -neutral_stance_height,  # x axis is vertical (positive up)
+                    -neutral_stance_transverse,  # y axis is transverse (for left side, positive is inward)
+                    neutral_stance_forward,  # z axis is sagittal (positive forward)...0 is directly under hip
+                ]
+                initial_guess=[0, 45, -90]
             else:
                 dh_table = self.dh_right
+                target_pos = [
+                    -neutral_stance_height,  # x axis is vertical (positive up)
+                    neutral_stance_transverse,  # y axis is transverse (for right side, positive is outward)
+                    neutral_stance_forward,  # z axis is sagittal (positive forward)...0 is directly under hip
+                ]
+                initial_guess=[0, -45, 90]
 
             neutral_feet_thetas[foot] = kin.inverse_kinematics(
                 dh_table,
                 target_pos,
-                initial_guess=np.radians([0, -45, 90]),
+                initial_guess=np.radians(initial_guess),
                 var_indices=[0, 2, 3],
                 fixed_values={1: np.pi},
             )
