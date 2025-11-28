@@ -15,7 +15,7 @@ body:
   height: 6 # [cm]
 
 walking:
-  deg_per_sec: 60
+  deg_per_sec: 120
   max_step_height_pct: 0.2
   step_length_deg: 20 # with leg fully straight, degree rotated forward for max step length
   LF_phase_offset: 0 # left front leg phase offset in degrees
@@ -99,6 +99,35 @@ servos:
     RB_theta1: 150
     RB_theta2: 150
     RB_theta3: 180
+
+  actuation_range:
+    LF_theta1: 270
+    LF_theta2: 270
+    LF_theta3: 270
+    RF_theta1: 270
+    RF_theta2: 270
+    RF_theta3: 270
+    LB_theta1: 270
+    LB_theta2: 270
+    LB_theta3: 270
+    RB_theta1: 270
+    RB_theta2: 270
+    RB_theta3: 270
+
+  pulsewidth_range:
+    LF_theta1: [500, 2500]
+    LF_theta2: [500, 2500]
+    LF_theta2: [500, 2500]
+    LF_theta3: [500, 2500]
+    RF_theta1: [500, 2500]
+    RF_theta2: [500, 2500]
+    RF_theta3: [500, 2500]
+    LB_theta1: [500, 2500]
+    LB_theta2: [500, 2500]
+    LB_theta3: [500, 2500]
+    RB_theta1: [500, 2500]
+    RB_theta2: [500, 2500]
+    RB_theta3: [500, 2500]
 
 visualization:
   joint_limits:

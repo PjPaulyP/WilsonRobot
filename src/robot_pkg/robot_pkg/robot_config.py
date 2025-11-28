@@ -41,6 +41,8 @@ class RobotConfig:
     joint_limit_maxs: list[float]
     joint_offsets: list[float]
     joint_reversed: list[int] # some servos may be reversed because servo body moves with link
+    servo_actuation_range: dict[str, int]
+    servo_pulsewidth_range: dict[str, list[int]]
 
     def __init__(self):
         self.params = None
@@ -122,7 +124,8 @@ class RobotConfig:
         self.joint_offsets = params["servos"].get("offsets", {})
         self.joint_reversed = params["servos"].get("reversed", {})
         self.servo_map = params["servos"].get("servo_map", {})
-        
+        self.servo_actuation_range = params["servos"].get("actuation_range", {})
+        self.servo_pulsewidth_range = params["servos"].get("pulsewidth_range", {})
 
     def calc_neutral_stance_height(self, neutral_stance_height_pct):
         # Calculate neutral height from hip axis to ground

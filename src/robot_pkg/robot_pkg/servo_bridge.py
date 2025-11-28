@@ -11,8 +11,14 @@ class ServoBridge(Node):
         
         super().__init__('servo_bridge_node')
         
-        self.kit = ServoKit(channels=16) # servo channels must be 8 or 16
         self.robot_config = robot_config
+        self.kit = ServoKit(channels=16) # servo channels must be 8 or 16
+        for name, channels in self.robot_config.servo_map.items():
+            self.kit.servo[channels].set_pulse_width_range(
+                self.robot_config.servo_pulsewidth_range[name][0], # min 
+                self.robot_config.servo_pulsewidth_range[name][1]  # max
+            )
+            self.kit.servo[channels].actuation_range = self.robot_config.servo_actuation_range[name]
         
         self.subscription = self.create_subscription(
             JointState,
