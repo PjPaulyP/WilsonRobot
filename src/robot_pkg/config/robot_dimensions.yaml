@@ -44,19 +44,40 @@ servos:
     RB_theta2: 10
     RB_theta3: 11
   
-  reversed:
-    LF_theta1: false 
-    LF_theta2: true 
-    LF_theta3: true 
-    RF_theta1: false
-    RF_theta2: true
-    RF_theta3: true
-    LB_theta1: false
-    LB_theta2: true
-    LB_theta3: true
-    RB_theta1: false
-    RB_theta2: true
-    RB_theta3: true
+  is_arm_rotate: 
+    # used as multiplier; 
+    # 1 if servo arm rotates the joint
+    # -1 if servo body rotates the joint
+    LF_theta1: 1
+    LF_theta2: -1 
+    LF_theta3: -1 
+    RF_theta1: 1
+    RF_theta2: -1
+    RF_theta3: -1
+    LB_theta1: 1
+    LB_theta2: -1
+    LB_theta3: -1
+    RB_theta1: 1
+    RB_theta2: -1
+    RB_theta3: -1
+
+  is_actuation_axis_co_rotate:
+    # used as multiplier; 
+    # 1 if servo actuation positive rotation direction matches joint Z-axis   
+    # -1 if not
+    LF_theta1: 1
+    LF_theta2: -1
+    LF_theta3: -1
+    RF_theta1: 1
+    RF_theta2: -1
+    RF_theta3: -1
+    LB_theta1: -1
+    LB_theta2: -1
+    LB_theta3: -1
+    RB_theta1: -1
+    RB_theta2: -1
+    RB_theta3: -1
+
 
   offsets:
     LF_theta1: 0 

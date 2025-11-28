@@ -43,6 +43,9 @@ class RobotConfig:
     joint_reversed: list[int] # some servos may be reversed because servo body moves with link
     servo_actuation_range: dict[str, int]
     servo_pulsewidth_range: dict[str, list[int]]
+    arm_rotation_multiplier: dict[str, int] # multiplier; +1 if servo arm rotating the joint, -1 if servo body is rotating the joint
+    actuation_axis_co_rotation_multiplier: dict[str, int] # multiplier; +1 if servo arm rotation axis is same as z-axis joint rotation axis, -1 if opposite
+
 
     def __init__(self):
         self.params = None
@@ -126,6 +129,9 @@ class RobotConfig:
         self.servo_map = params["servos"].get("servo_map", {})
         self.servo_actuation_range = params["servos"].get("actuation_range", {})
         self.servo_pulsewidth_range = params["servos"].get("pulsewidth_range", {})
+        self.arm_rotation_multiplier = params["servos"].get("arm_rotation_multiplier", {})
+        self.actuation_axis_co_rotation_multiplier = params["servos"].get("actuation_axis_co_rotation_multiplier", {})
+
 
     def calc_neutral_stance_height(self, neutral_stance_height_pct):
         # Calculate neutral height from hip axis to ground
