@@ -44,7 +44,7 @@ servos:
     RB_theta2: 10
     RB_theta3: 11
   
-  is_arm_rotate: 
+  arm_rotation_multiplier: 
     # used as multiplier; 
     # 1 if servo arm rotates the joint
     # -1 if servo body rotates the joint
@@ -61,7 +61,7 @@ servos:
     RB_theta2: -1
     RB_theta3: -1
 
-  is_actuation_axis_co_rotate:
+  actuation_axis_co_rotation_multiplier:
     # used as multiplier; 
     # 1 if servo actuation positive rotation direction matches joint Z-axis   
     # -1 if not
@@ -78,6 +78,19 @@ servos:
     RB_theta2: -1
     RB_theta3: -1
 
+  servo_zero_to_dh_zero_angles:
+    LF_theta1: 90 
+    LF_theta2: 90 
+    LF_theta3: 150 
+    RF_theta1: 90
+    RF_theta2: 90
+    RF_theta3: 0
+    LB_theta1: 90
+    LB_theta2: 90
+    LB_theta3: 150
+    RB_theta1: 90
+    RB_theta2: 90
+    RB_theta3: 0
 
   offsets:
     LF_theta1: 0 
@@ -96,30 +109,30 @@ servos:
   min_angles:
     LF_theta1: 30 
     LF_theta2: 30
-    LF_theta3: 90
+    LF_theta3: 30
     RF_theta1: 30
     RF_theta2: 30
-    RF_theta3: 90
+    RF_theta3: 0
     LB_theta1: 30
     LB_theta2: 30
-    LB_theta3: 90
+    LB_theta3: 30
     RB_theta1: 30
     RB_theta2: 30
-    RB_theta3: 90
+    RB_theta3: 0
 
   max_angles:
     LF_theta1: 150
-    LF_theta2: 150
-    LF_theta3: 180
+    LF_theta2: 120
+    LF_theta3: 150
     RF_theta1: 150
     RF_theta2: 150
-    RF_theta3: 180
+    RF_theta3: 120
     LB_theta1: 150
-    LB_theta2: 150
-    LB_theta3: 180
+    LB_theta2: 120
+    LB_theta3: 150
     RB_theta1: 150
     RB_theta2: 150
-    RB_theta3: 180
+    RB_theta3: 120
 
   actuation_range:
     LF_theta1: 270

@@ -38,13 +38,15 @@ class ServoBridge(Node):
             channel = self.robot_config.servo_map[joint_name]
 
             # Add 90deg to convert to 0-180deg servo angle
-            angle_deg = 90 + np.degrees(pos) * self.robot_config.arm_rotation_multiplier[joint_name] * self.robot_config.actuation_axis_co_rotation_multiplier[joint_name]
+            angle_deg = self.robot_config.servo_zero_to_dh_zero_angles[joint_name] + np.degrees(pos) * self.robot_config.arm_rotation_multiplier[joint_name] * self.robot_config.actuation_axis_co_rotation_multiplier[joint_name]
             angle_deg += self.robot_config.joint_offsets[joint_name]
 
             print(f"Joint: {joint_name}, Angle: {angle_deg}")
 
             # Clamp to servo safe range
             angle_deg = self.clamp(angle_deg, self.robot_config.joint_limit_mins[joint_name], self.robot_config.joint_limit_maxs[joint_name])
+
+            print(f"CLAMPED Joint: {joint_name}, Angle: {angle_deg}")
 
             # Send to servo
             channel = self.robot_config.servo_map[joint_name]
